@@ -2,6 +2,7 @@ package gr.pmm.pmmhr2022.controller;
 
 import gr.pmm.pmmhr2022.dto.DepartmentDto;
 import gr.pmm.pmmhr2022.dto.EmployeeDto;
+import gr.pmm.pmmhr2022.dto.ProjectDto;
 import gr.pmm.pmmhr2022.exception.EmployeeException;
 import gr.pmm.pmmhr2022.service.HrService;
 import lombok.AllArgsConstructor;
@@ -43,4 +44,22 @@ public class HrController {
         return hrService.readEmployee(employeeId);
 
     }
+
+
+    @PostMapping("/project")
+    public ProjectDto create(@RequestBody ProjectDto projectDto) throws EmployeeException {
+        hrService.createProject(projectDto);
+        return projectDto;
+    }
+
+    @PutMapping("/employee/{employeeId}/project/{projectId}")
+    public EmployeeDto  assignToProject(@PathVariable(name="employeeId") long employeeId,
+                                           @PathVariable(name="projectId") long projectId) throws EmployeeException {
+        hrService.assignProjectToEmployee(employeeId, projectId);
+        return hrService.readEmployee(employeeId);
+
+    }
+
+
+
 }

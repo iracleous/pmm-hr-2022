@@ -2,17 +2,21 @@ package gr.pmm.pmmhr2022.service;
 
 import gr.pmm.pmmhr2022.dto.DepartmentDto;
 import gr.pmm.pmmhr2022.dto.EmployeeDto;
+import gr.pmm.pmmhr2022.dto.ProjectDto;
 import gr.pmm.pmmhr2022.exception.EmployeeException;
 import gr.pmm.pmmhr2022.model.Department;
 import gr.pmm.pmmhr2022.model.Employee;
+import gr.pmm.pmmhr2022.model.Project;
 import gr.pmm.pmmhr2022.repository.DepartmentRepository;
 import gr.pmm.pmmhr2022.repository.EmployeeRepository;
+import gr.pmm.pmmhr2022.repository.ProjectRepository;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -23,7 +27,10 @@ public class HrServiceImpl implements HrService{
 
     private EmployeeRepository employeeRepository;
     private DepartmentRepository departmentRepository;
+
+    private ProjectRepository projectRepository;
     private ModelMapper modelMapper;
+
 
     @Override
     @Transactional
@@ -93,5 +100,34 @@ public class HrServiceImpl implements HrService{
         return modelMapper.map(employeeOptional.get(), EmployeeDto.class);
         else
             throw new EmployeeException("employee not found");
+    }
+
+    @Override
+    @Transactional
+    public void createProject(ProjectDto projectDto) throws EmployeeException {
+        if (projectDto == null)
+            throw new EmployeeException("null dto");
+        if (projectDto.getName() == null)
+            throw new EmployeeException("no name dto");
+
+        Project project = modelMapper.map(projectDto, Project.class);
+        projectRepository.save(project);
+        projectDto.setId(project.getId());
+    }
+
+    @Override
+    @Transactional
+    public void assignProjectToEmployee(long employeeId, long projectId) throws EmployeeException {
+        Optional<Employee> employeeOptional = employeeRepository.findById(employeeId);
+        if(!employeeOptional.isPresent())
+            throw new    EmployeeException("Employee not found");
+        Optional<Project> projectOptional = projectRepository.findById(projectId);
+        if(!projectOptional.isPresent())
+            throw new    EmployeeException("Project not found");
+
+        Employee employee = employeeOptional.get();
+        Project project = projectOptional.get();
+         employee.getProjects().add(project);
+         employeeRepository.save(employee);
     }
 }
